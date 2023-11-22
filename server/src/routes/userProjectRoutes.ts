@@ -1,9 +1,13 @@
 import express from 'express';
-
-const routes = express.Router();
-
+import authenticationMiddleware from "../middleware/authenticationMiddleware";
+import authorizationMiddleware from "../middleware/authorizationMiddleware";
 import userProjectController from '../controller/userProjectController';
 
+
+
+const { verifyToken } = authenticationMiddleware;
+const { isAdminOrManager, isManager } = authorizationMiddleware;
+const routes = express.Router();
 const {
   getAllUserProject,
   getUserProjectByProjectId,
@@ -15,12 +19,12 @@ const {
 
 const userProjectRoutes = ()=>{
         routes
-        .get('/',getAllUserProject)
-        .get('/:user_id',getUserProjectByUserId)
-        .get('/:project_id',getUserProjectByProjectId)
-        .post('/',createUserProject)
-        .put('/:id',updateUserProject)
-        .delete('/:id',deleteUserProject)
+          .get("/", [verifyToken,isAdminOrManager], getAllUserProject)
+          .get("/user/:user_id", getUserProjectByUserId)
+          .get("/project/:project_id", getUserProjectByProjectId)
+          .post("/",[verifyToken,isAdminOrManager],createUserProject)
+          .put("/:id",[verifyToken,isAdminOrManager], updateUserProject)
+          .delete("/:id",[verifyToken,isAdminOrManager],deleteUserProject);
         return routes;
 }
 
